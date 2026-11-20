@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tropos</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#121214">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tropos">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png">
+<link rel="preconnect" href="https://evmqihsukrbasnoyaduv.supabase.co" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Onest:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/app.css?v=15">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js">
+<link rel="modulepreload" href="js/access.js?v=15">
+<link rel="modulepreload" href="js/cal.js?v=15">
+<link rel="modulepreload" href="js/calendar.js?v=15">
+<link rel="modulepreload" href="js/crm.js?v=15">
+<link rel="modulepreload" href="js/dash.js?v=15">
+<link rel="modulepreload" href="js/db.js?v=15">
+<link rel="modulepreload" href="js/del.js?v=15">
+<link rel="modulepreload" href="js/docs.js?v=15">
+<link rel="modulepreload" href="js/fact.js?v=15">
+<link rel="modulepreload" href="js/finance.js?v=15">
+<link rel="modulepreload" href="js/gpr.js?v=15">
+<link rel="modulepreload" href="js/main.js?v=15">
+<link rel="modulepreload" href="js/me.js?v=15">
+<link rel="modulepreload" href="js/offers.js?v=15">
+<link rel="modulepreload" href="js/org.js?v=15">
+<link rel="modulepreload" href="js/projects.js?v=15">
+<link rel="modulepreload" href="js/settings2.js?v=15">
+<link rel="modulepreload" href="js/tasks.js?v=15">
+<link rel="modulepreload" href="js/templates.js?v=15">
+<link rel="modulepreload" href="js/ui.js?v=15">
+<link rel="modulepreload" href="js/views.js?v=15">
+<link rel="modulepreload" href="js/words.js?v=15">
+<script>
+// Если программа не запустилась — показать причину вместо пустого экрана. Срабатывает только пока идёт запуск.
+window.__booted = false;
+window.__bootFail = function (msg) {
+  if (window.__booted) return;
+  var a = document.getElementById("app");
+  if (a) a.innerHTML = '<div class="boot" style="padding:40px 20px;line-height:1.5">Не удалось открыть Tropos.<br><small style="color:#999">' + String(msg || "").replace(/[<>&]/g, "") + '</small><br><br><button onclick="location.reload()" style="padding:10px 18px;border-radius:10px;border:1px solid #ccc;background:#fff;font:inherit">Обновить</button></div>';
+};
+window.addEventListener("error", function (e) { if (e.target && e.target.tagName === "SCRIPT") window.__bootFail("не загрузилась часть программы, проверьте интернет"); }, true);
+window.__bootTimer = setTimeout(function () { window.__bootFail("Очень медленный интернет — нажмите «Обновить»"); }, 30000);
+if ("serviceWorker" in navigator) addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+</script>
+</head>
+<body>
+<div id="app"><div class="boot"><div class="boot-logo">tropos <span class="pill"></span></div>Загрузка…</div></div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script type="module" src="js/main.js?v=15"></script>
+</body>
+</html>

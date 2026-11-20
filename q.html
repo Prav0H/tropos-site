@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tropos — внедрение системы управления</title>
+<meta name="description" content="Расскажите о задаче и запишитесь на бесплатную встречу с Tropos.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 32'%3E%3Cdefs%3E%3ClinearGradient id='g'%3E%3Cstop offset='0' stop-color='%23e8432e'/%3E%3Cstop offset='.45' stop-color='%23ff9a1f'/%3E%3Cstop offset='1' stop-color='%232357f5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='32' rx='16' fill='url(%23g)'/%3E%3Ccircle cx='48' cy='16' r='11' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Onest:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f6f5f1;--ink:#141416;--muted:#6b6a68;--line:#e4e1d9;--accent:#2357f5;--bad:#c0392b;--good:#1d7f55;--grad:linear-gradient(90deg,#e8432e 0%,#ff9a1f 30%,#f7d9a8 55%,#2ec5f0 78%,#2357f5 100%);color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:15px/1.5 "Onest",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.top{background:#121214;color:#fff;padding:18px 16px 0}
+.top .in{max-width:640px;margin:0 auto}
+.logo{display:flex;align-items:center;gap:10px;font:800 22px "Montserrat",sans-serif;letter-spacing:-.02em}
+.pill{width:40px;height:20px;border-radius:20px;background:var(--grad);position:relative}
+.pill::after{content:"";position:absolute;right:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff}
+.top h1{font:700 22px/1.25 "Montserrat",sans-serif;margin:16px 0 6px;letter-spacing:-.01em}
+.top p{margin:0;color:#bdbab2;font-size:14px}
+.top .bar{height:4px;background:var(--grad);margin-top:18px;border-radius:4px 4px 0 0}
+.chat{max-width:640px;margin:0 auto;padding:18px 16px 140px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:86%;padding:10px 14px;border-radius:16px;animation:in .25s ease-out;white-space:pre-wrap;word-wrap:break-word}
+.bot{background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px;align-self:flex-start;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.me{background:var(--ink);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.typing{display:inline-flex;gap:4px;padding:14px 16px}
+.typing i{width:6px;height:6px;border-radius:50%;background:#bbb;animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.3;transform:none}40%{opacity:1;transform:translateY(-3px)}}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.dock{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(246,245,241,0),var(--bg) 24%);padding:24px 16px max(16px,env(safe-area-inset-bottom))}
+.dock .in{max-width:640px;margin:0 auto}
+.opts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.opt{border:1.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:99px;padding:9px 16px;font:500 14.5px "Onest",sans-serif;cursor:pointer;transition:background .15s,color .15s}
+.opt:hover{background:var(--ink);color:#fff}
+.opt.ghost{border-color:var(--line);color:var(--muted)}
+.row{display:flex;gap:8px;align-items:flex-end}
+.row textarea,.row input{flex:1;font:15px "Onest",sans-serif;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;resize:none;min-width:0;outline:0}
+.row textarea:focus,.row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #e6ecff}
+.send{flex:none;width:48px;height:48px;border-radius:50%;border:0;background:var(--ink);color:#fff;font-size:20px;cursor:pointer}
+.send:disabled{opacity:.35;cursor:default}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px;text-align:right}
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:thin}
+.day{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;text-align:center;font:500 13px "Onest",sans-serif;color:var(--ink);min-width:72px}
+.day b{display:block;font:700 17px "Montserrat",sans-serif}
+.day.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.day:disabled{opacity:.35;cursor:default}
+.times{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;max-height:200px;overflow-y:auto}
+.time{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 0;cursor:pointer;font:600 14.5px "Onest",sans-serif;color:var(--ink)}
+.time:hover{border-color:var(--ink)}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;align-self:stretch;box-shadow:0 6px 20px rgba(0,0,0,.06);animation:in .3s ease-out}
+.card .t{font:700 18px "Montserrat",sans-serif;margin-bottom:4px}
+.card .g{height:4px;background:var(--grad);border-radius:4px;margin:-16px -16px 14px;border-radius:16px 16px 0 0}
+.err{color:var(--bad)}
+.hp{position:absolute;left:-9999px;opacity:0}
+.foot{text-align:center;font-size:12px;color:var(--muted);padding:6px 0 0}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <div class="logo"><span class="pill"></span>tropos</div>
+  <h1>Наведём порядок в управлении вашей компанией</h1>
+  <p>Пара вопросов — и запишем вас на бесплатную встречу. Займёт 2 минуты.</p>
+  <div class="bar"></div>
+</div></div>
+<main class="chat" id="chat" aria-live="polite"></main>
+<div class="dock"><div class="in" id="dock"></div></div>
+<input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const sb = supabase.createClient("https://evmqihsukrbasnoyaduv.supabase.co", "sb_publishable_m0mzaiDkpVLo2rBEeKZhIQ_wDY0FM9W", { auth: { persistSession: false } });
+const chat = document.getElementById("chat"), dock = document.getElementById("dock");
+const A = {}; let lead = null;
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const down = () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+async function bot(html, ms = 650) {
+  const t = document.createElement("div"); t.className = "msg bot typing"; t.innerHTML = "<i></i><i></i><i></i>"; chat.appendChild(t); down();
+  await wait(ms); t.className = "msg bot"; t.innerHTML = html; down();
+}
+function me(text) { const m = document.createElement("div"); m.className = "msg me"; m.textContent = text; chat.appendChild(m); down(); }
+function ask({ ph = "", multi = false, type = "text", hint = "", min = 1, skip = "" }) {
+  return new Promise((res) => {
+    dock.innerHTML = `<div class="row">${multi ? `<textarea id="in" rows="3" placeholder="${esc(ph)}"></textarea>` : `<input id="in" type="${type}" placeholder="${esc(ph)}" autocomplete="on">`}<button class="send" id="go" aria-label="Отправить" disabled>➤</button></div>${hint ? `<div class="hint">${esc(hint)}</div>` : ""}${skip ? `<div class="opts" style="margin-top:8px"><button class="opt ghost" id="sk">${esc(skip)}</button></div>` : ""}`;
+    const i = document.getElementById("in"), g = document.getElementById("go");
+    i.focus(); i.oninput = () => (g.disabled = i.value.trim().length < min);
+    const done = (v) => { dock.innerHTML = ""; me(v || skip); res(v); };
+    g.onclick = () => done(i.value.trim());
+    i.onkeydown = (e) => { if (e.key === "Enter" && (!multi || e.ctrlKey || e.metaKey) && !g.disabled) { e.preventDefault(); done(i.value.trim()); } };
+    const s = document.getElementById("sk"); if (s) s.onclick = () => done("");
+  });
+}
+function choose(list) {
+  return new Promise((res) => {
+    dock.innerHTML = `<div class="opts">${list.map((x, i) => `<button class="opt" data-i="${i}">${esc(x)}</button>`).join("")}</div>`;
+    dock.querySelectorAll("[data-i]").forEach((b) => (b.onclick = () => { const v = list[+b.dataset.i]; dock.innerHTML = ""; me(v); res(v); }));
+  });
+}
+
+/* ---------- свободное время ---------- */
+const MSK = 3 * 3600e3;
+const mskParts = (d) => { const x = new Date(d.getTime() + MSK); return { date: x.toISOString().slice(0, 10), hm: x.toISOString().slice(11, 16), wd: x.getUTCDay() }; };
+const at = (date, hm) => new Date(`${date}T${hm}:00+03:00`);
+const toMin = (hm) => { const [h, m] = hm.split(":").map(Number); return h * 60 + m; };
+async function slots() {
+  const { data: cfg, error } = await sb.rpc("q_cfg"); if (error) throw error;
+  const c = Object.assign({ from: "07:00", to: "21:00", dur: 60, gap: 15, days: 14, notice: 3 }, cfg.cal || {}), people = cfg.people || [];
+  const now = new Date(cfg.now), from = new Date(now.getTime() + c.notice * 3600e3), to = new Date(now.getTime() + (c.days + 1) * 864e5);
+  const { data: iv, error: e2 } = await sb.rpc("busy_times", { p_from: now.toISOString(), p_to: to.toISOString() }); if (e2) throw e2;
+  const B = (iv || []).map((x) => ({ p: x.person_id, s: new Date(x.s).getTime(), e: new Date(x.e).getTime() }));
+  const gap = c.gap * 60e3, dur = c.dur * 60e3, step = 30 * 60e3, out = {};
+  for (let k = 0; k <= c.days; k++) {
+    const date = mskParts(new Date(now.getTime() + k * 864e5)).date;
+    for (let m = toMin(c.from); m + c.dur <= toMin(c.to); m += 30) {
+      const s = at(date, `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`).getTime(), e = s + dur;
+      if (s < from.getTime()) continue;
+      const hit = B.filter((x) => x.s < e + gap && x.e > s - gap);
+      const free = people.filter((p) => !hit.some((x) => x.p === p)).length, un = hit.filter((x) => !x.p).length;
+      if (free > un) (out[date] = out[date] || []).push(new Date(s));
+    }
+  }
+  return out;
+}
+const WD = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"], MON = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+function pickSlot(S) {
+  return new Promise((res) => {
+    const days = Object.keys(S).sort();
+    let cur = days[0];
+    const draw = () => {
+      dock.innerHTML = `<div class="days">${days.map((d) => { const x = new Date(d + "T12:00:00+03:00"); return `<button class="day${d === cur ? " on" : ""}" data-d="${d}">${WD[x.getUTCDay()]}<b>${+d.slice(8)}</b>${MON[+d.slice(5, 7) - 1]}</button>`; }).join("")}</div>
+        <div class="times">${S[cur].map((t, i) => `<button class="time" data-t="${i}">${mskParts(t).hm}</button>`).join("")}</div><div class="hint">Время московское. Встреча онлайн, около часа.</div>`;
+      dock.querySelectorAll("[data-d]").forEach((b) => (b.onclick = () => { cur = b.dataset.d; draw(); }));
+      dock.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => { const t = S[cur][+b.dataset.t]; dock.innerHTML = ""; const x = new Date(cur + "T12:00:00+03:00"); me(`${WD[x.getUTCDay()]}, ${+cur.slice(8)} ${MON[+cur.slice(5, 7) - 1]}, ${mskParts(t).hm}`); res(t); }));
+    };
+    draw();
+  });
+}
+
+/* ---------- сценарий ---------- */
+async function run() {
+  await bot("Здравствуйте! 👋 Я помощник Tropos. Мы внедряем системы управления: задачи, сделки, проекты и деньги — в одном месте, и чтобы команда этим пользовалась.", 500);
+  await bot("Как к вам обращаться?");
+  A.name = await ask({ ph: "Имя", hint: "Enter — отправить" });
+  await bot(`Приятно познакомиться, ${esc(A.name.split(/\s+/)[0])}! Как с вами связаться? Телефон или ник в Telegram.`);
+  A.contact = await ask({ ph: "+7 999 123-45-67 или @nick", type: "text", min: 4 });
+  await bot("Как называется ваша компания и чем она занимается? Работаем с любым направлением.");
+  const comp = await ask({ ph: "Например: «Вектор», доставка цветов", multi: true, hint: "Ctrl+Enter — отправить" });
+  A.company = comp.split(/,|\s[—–-]\s|:|\n/)[0].replace(/[«»"]/g, "").trim().slice(0, 120); A.business = comp;
+  try {
+    const { data, error } = await sb.rpc("q_start", { p_name: A.name, p_contact: A.contact, p_company: A.company, p_business: A.business, p_hp: document.getElementById("hp").value });
+    if (error) throw error; lead = data;
+  } catch (e) { return bot(`<span class="err">Не получилось отправить: ${esc(e.message)}. Попробуйте обновить страницу.</span>`); }
+  await bot("Спасибо, записал. 🙌 Теперь главное:");
+  await bot("Распишите проблему, которую хотите решить. Что сейчас мешает, где теряются деньги, время или клиенты?");
+  A.pain = await ask({ ph: "Опишите своими словами — можно подробно", multi: true, min: 10, hint: "Ctrl+Enter — отправить" });
+  await bot("Понял. Кто у вас принимает решение о таком проекте?");
+  A.lpr = await choose(["Я", "Вместе с партнёром", "Не я"]);
+  await bot("Когда хотели бы начать?");
+  A.start = await choose(["Сейчас", "В течение месяца", "Через 1–3 месяца", "Позже"]);
+  let r;
+  try { const { data, error } = await sb.rpc("q_answer", { p_id: lead.id, p_token: lead.token, p_pain: A.pain, p_lpr: A.lpr, p_start: A.start }); if (error) throw error; r = data; }
+  catch (e) { return bot(`<span class="err">Не получилось сохранить ответы: ${esc(e.message)}</span>`); }
+  if (!r.qualified) {
+    return bot(A.lpr === "Не я"
+      ? "Спасибо! Встречу лучше проводить вместе с тем, кто принимает решение. Мы свяжемся с вами и договоримся, как удобнее. Хорошего дня!"
+      : "Спасибо! Записали вашу задачу. Мы напишем ближе к сроку, когда будете готовы начать. Хорошего дня!");
+  }
+  await bot("Отлично, вы как раз по адресу. 👍 Давайте выберем время для бесплатной онлайн-встречи: разберём вашу задачу и покажем, как её решить.");
+  for (let attempt = 0; attempt < 4; attempt++) {
+    let S;
+    try { S = await slots(); } catch (e) { return bot(`<span class="err">Не удалось загрузить расписание. Мы свяжемся с вами сами.</span>`); }
+    if (!Object.keys(S).length) return bot("Ближайшие дни уже заняты. Мы сами свяжемся с вами и предложим время. Спасибо!");
+    const t = await pickSlot(S);
+    const { data, error } = await sb.rpc("q_book", { p_id: lead.id, p_token: lead.token, p_start: t.toISOString() });
+    if (error) { await bot(`${esc(error.message.replace(/^.*?: /, ""))}. Выберите, пожалуйста, другое время.`); continue; }
+    const p = mskParts(new Date(data.start)), x = new Date(p.date + "T12:00:00+03:00");
+    const card = document.createElement("div"); card.className = "card";
+    card.innerHTML = `<div class="g"></div><div class="t">Вы записаны ✅</div><div>${["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"][x.getUTCDay()]}, ${+p.date.slice(8)} ${MON[+p.date.slice(5, 7) - 1]}, ${p.hm}–${mskParts(new Date(data.end)).hm} по Москве</div>
+      ${data.link ? `<div style="margin-top:8px">Ссылка на встречу: <a href="${esc(data.link)}" target="_blank" rel="noopener">${esc(data.link)}</a></div>` : `<div style="margin-top:8px;color:var(--muted)">Ссылку на встречу пришлём перед началом.</div>`}
+      <div style="margin-top:8px;color:var(--muted);font-size:13.5px">Если планы поменяются — просто напишите нам, перенесём.</div>`;
+    chat.appendChild(card); down();
+    return bot("До встречи! Мы уже получили вашу заявку и подготовимся.", 900);
+  }
+  bot("Похоже, время быстро разбирают. Мы свяжемся с вами сами и подберём удобное.");
+}
+run();
+</script>
+</body>
+</html>
